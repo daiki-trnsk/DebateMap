@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>DebateMap</title>
+    <link rel="stylesheet" href="/css/general.css">
+    <script type="text/javascript" src="/js/general.js"></script>
+    <script type="text/javascript" src="/js/api.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <h1 class="title">DebateMap</h1>
+        <button onclick="logout()" class="logoutButton">LOGOUT</button>
+        <div class="userName">
+            <p id="welcome"></p>
+        </div>
+    </div>
+    <div class="main">
+        <div>
+            <button onclick="location.href='mindmap-cerate.html'" class="createButton">+</button>
+        </div>
+        <div class="startDebate">
+            <h1>議論を始めましょう</h1>
+            <h3>参加したいタイトルをクリック　or　右下の＋から新たな議論を始める</h3>
+        </div>
+
+        <ul id="data-list">
+            <!-- ここにデータが表⽰される -->
+        </ul>
+    </div>
+    <div class="footer">
+
+    </div>
+</body>
+<script>
+    if (!checkLogin()) {
+        handleLoginError();
+    }
+    getMeApi().then((data) => {
+        console.log("data:", data);
+        const welcomeH1 = document.getElementById("welcome");
+        welcomeH1.innerText = `${data.nickname}さん`;
+    });
+    //const API_HOST = "http://localhost:8000";
+    const getMultiReplies = async () => {
+        const MULTI_ENDPOINT = "/mindmaps_list";
+        const URL = API_HOST + MULTI_ENDPOINT;
+        const response = await fetch(URL, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+        const jsondata = await response.json();
+        const dataList = document.getElementById("data-list");
+        jsondata.forEach((mindmap) => {
+            const li = document.createElement("li");
+            li.className = "data-item";
+            li.innerHTML = `
+<a href="/mindmap-detail.html?mindmapId=${mindmap.id}">${mindmap.id}
+<br><h2>${mindmap.title}</h2>
+<br>${mindmap.registration_date}</a> `;
+            dataList.appendChild(li);
+        });
+    };
+    getMultiReplies();
+</script>
+
+</html>
